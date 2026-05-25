@@ -101,10 +101,20 @@
         <a href="https://console.anthropic.com/settings/keys" target="_blank"
            class="text-indigo-500 font-normal ml-1 hover:underline text-xs">↗ 발급 받기</a>
       </label>
-      <input type="password" id="api-key-input"
-        placeholder="sk-ant-api03-..."
-        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-gray-800 mb-1 text-sm" />
-      <p class="text-xs text-gray-400 mb-4">🔒 키는 이 브라우저 세션에만 저장되며 어떤 서버로도 전송되지 않습니다</p>
+      <div class="relative mb-1">
+        <input type="password" id="api-key-input"
+          placeholder="sk-ant-api03-..."
+          class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 text-gray-800 text-sm" />
+        <button type="button" id="toggle-key-btn"
+          onclick="toggleKeyVisibility()"
+          title="API 키 표시/숨기기"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg select-none">👁</button>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-4 text-xs text-green-700 leading-relaxed">
+        🔐 <strong>보안 안내</strong> — API 키는 이 페이지의 자바스크립트 메모리에만 저장됩니다.<br>
+        localStorage·sessionStorage·쿠키에 기록되지 않으며, 탭을 닫으면 즉시 삭제됩니다.<br>
+        외부 서버로 전송되지 않으며 <strong>api.anthropic.com</strong>에만 직접 호출됩니다.
+      </div>
       <button onclick="startApp()" class="btn-primary w-full text-white font-bold py-4 rounded-xl text-base">
         🚀 실험 시작하기
       </button>
@@ -440,8 +450,23 @@ function showScreen(id) {
 }
 
 /* ─── SETUP ─────────────────────────────────────────────── */
+function toggleKeyVisibility() {
+  const inp = document.getElementById('api-key-input');
+  const btn = document.getElementById('toggle-key-btn');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+    btn.title = 'API 키 숨기기';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁';
+    btn.title = 'API 키 표시';
+  }
+}
+
 function startApp() {
-  const key = document.getElementById('api-key-input').value.trim();
+  const inp = document.getElementById('api-key-input');
+  const key = inp.value.trim();
   const err = document.getElementById('setup-err');
   if (!key.startsWith('sk-ant-')) {
     err.textContent = '⚠️ 올바른 Anthropic API 키 형식(sk-ant-...)을 입력해주세요';
@@ -449,6 +474,10 @@ function startApp() {
     return;
   }
   S.apiKey = key;
+  // 보안: 입력 필드에서 키 즉시 삭제 (DOM에 키가 남지 않도록)
+  inp.value = '';
+  inp.type = 'password';
+  document.getElementById('toggle-key-btn').textContent = '👁';
   err.classList.add('hidden');
   showScreen('expselect');
 }
